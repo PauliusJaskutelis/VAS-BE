@@ -1,0 +1,20 @@
+version: '1'
+
+services:
+  mysql:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'testdatabase'
+      MYSQL_ROOT_PASSWORD: 'password'
+    ports:
+      - "3306:3306"  # Expose MySQL port
+
+  javaapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
