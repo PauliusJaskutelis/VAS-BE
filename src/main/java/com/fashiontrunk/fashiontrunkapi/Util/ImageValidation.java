@@ -1,9 +1,12 @@
 package com.fashiontrunk.fashiontrunkapi.Util;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 public class ImageValidation {
 
@@ -43,5 +46,20 @@ public class ImageValidation {
 
     public static boolean isValidImage(MultipartFile file){
         return isValidJpeg(file) || isValidPng(file);
+    }
+
+    public static boolean isValidImageBundle(MultipartFile[] files) {
+        for (MultipartFile file: files) {
+            String contentType = file.getContentType();
+
+            if(!isValidImage(file)){
+                return false;
+            }
+            if (!Objects.equals(contentType, "image/png") &&
+                    !Objects.equals(contentType, "image/jpeg")) {
+                return false;
+            }
+        }
+        return true;
     }
 }
