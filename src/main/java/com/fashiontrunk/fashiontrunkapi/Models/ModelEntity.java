@@ -36,6 +36,9 @@ public class ModelEntity {
     @Column(name = "uploaded_at")
     private LocalDateTime uploadedAt;
 
+    @Column(name = "status")
+    private String status;
+
     public UUID getId() {
         return id;
     }
@@ -106,5 +109,13 @@ public class ModelEntity {
 
     public void setUploadedAt(LocalDateTime uploadedAt) {
         this.uploadedAt = uploadedAt;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

@@ -7,7 +7,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop  # or validate/create-drop if preferred
+      ddl-auto: update  # or validate/create-drop if preferred
     show-sql: true
     database-platform: org.hibernate.dialect.MySQL8Dialect
 
