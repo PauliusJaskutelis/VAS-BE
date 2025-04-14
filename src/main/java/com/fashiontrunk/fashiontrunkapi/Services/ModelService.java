@@ -5,6 +5,7 @@ import com.fashiontrunk.fashiontrunkapi.Repositories.ModelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,5 +24,8 @@ public class ModelService {
 
     public Optional<ModelEntity> getModelById(UUID id){
         return modelRepository.findById(id);
+    }
+    public List<ModelEntity> getAllModels() {
+        return modelRepository.findAll();
     }
 }
