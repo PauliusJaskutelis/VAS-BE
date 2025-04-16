@@ -2,6 +2,7 @@ package com.fashiontrunk.fashiontrunkapi.Util;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,11 +20,15 @@ public class ModelStorage {
             Files.createDirectories(dirPath);
         }
 
-        String filename = modelId +  file.getOriginalFilename();
+        String filename = modelId + file.getOriginalFilename();
         Path destination = dirPath.resolve(filename);
 
         file.transferTo(destination.toFile());
 
         return destination.toAbsolutePath().toString();
+    }
+    public static File getModelFile(UUID modelId, String storagePath) {
+        Path path = Paths.get(storagePath);
+        return path.toFile();
     }
 }

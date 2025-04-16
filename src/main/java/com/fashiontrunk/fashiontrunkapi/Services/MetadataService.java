@@ -1,15 +1,12 @@
 package com.fashiontrunk.fashiontrunkapi.Services;
 
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -19,9 +16,9 @@ public class MetadataService extends ContainerServiceBase {
     @Override protected String getContainerName() { return "metadata-service"; }
     @Override protected String getImageName() { return "metadata-service"; }
     @Override protected int getPort() { return 5001; }
-    @Override protected String getHealthCheckUrl() { return "http://localhost:5001/docs"; }
+    @Override protected String getHealthCheckUrl() { return "http://localhost:" + this.getPort() + "/docs"; }
      public Map<String, Object> extractMetadata(MultipartFile model) throws IOException, InterruptedException {
-         ensureContainerRunning();
+         startContainer();
 
          HttpHeaders headers = new HttpHeaders();
          headers.setContentType(MediaType.MULTIPART_FORM_DATA);
