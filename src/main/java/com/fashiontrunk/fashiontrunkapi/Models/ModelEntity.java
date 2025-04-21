@@ -39,6 +39,9 @@ public class ModelEntity {
     @Column(name = "status")
     private String status;
 
+    @Column
+    private boolean isPublic;
+
     public UUID getId() {
         return id;
     }
