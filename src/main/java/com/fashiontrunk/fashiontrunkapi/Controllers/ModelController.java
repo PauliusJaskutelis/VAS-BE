@@ -42,7 +42,7 @@ public class ModelController {
         UUID modelId = UUID.fromString(id);
         try {
             updateStatus(modelId, "EXTRACTING");
-            Map<String, Object> modelMetadata = metadataService.extractMetadata(file);
+            Map<String, Object> modelMetadata = metadataService.extractModelMetadata(file);
 
             updateStatus(modelId, "VALIDATING");
             ModelEntity model = new ModelEntity();
