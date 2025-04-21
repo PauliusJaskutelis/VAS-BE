@@ -1,7 +1,9 @@
 package com.fashiontrunk.fashiontrunkapi.Services;
 
+import com.fashiontrunk.fashiontrunkapi.Dto.ImageMetadataDTO;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -17,7 +19,7 @@ public class MetadataService extends ContainerServiceBase {
     @Override protected String getImageName() { return "metadata-service"; }
     @Override protected int getPort() { return 5001; }
     @Override protected String getHealthCheckUrl() { return "http://localhost:" + this.getPort() + "/docs"; }
-     public Map<String, Object> extractMetadata(MultipartFile model) throws IOException, InterruptedException {
+     public Map<String, Object> extractModelMetadata(MultipartFile model) throws IOException, InterruptedException {
          startContainer();
 
          HttpHeaders headers = new HttpHeaders();
@@ -40,4 +42,29 @@ public class MetadataService extends ContainerServiceBase {
 
          return response.getBody();
      }
+
+    public ImageMetadataDTO extractImageMetadata(MultipartFile image) throws IOException, InterruptedException {
+        startContainer(); // Užtikrina, kad servisas paleistas
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        ByteArrayResource fileAsResource = new ByteArrayResource(image.getBytes()) {
+            @Override public String getFilename() { return image.getOriginalFilename(); }
+        };
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", fileAsResource);
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<ImageMetadataDTO> response = restTemplate.exchange(
+                "http://localhost:" + getPort() + "/extract-image-metadata",
+                HttpMethod.POST,
+                requestEntity,
+                ImageMetadataDTO.class
+        );
+
+        return response.getBody();
+    }
 }
