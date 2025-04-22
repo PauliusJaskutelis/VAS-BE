@@ -1,16 +1,19 @@
 package com.fashiontrunk.fashiontrunkapi.Controllers;
 
 import com.fashiontrunk.fashiontrunkapi.Models.ModelEntity;
-import com.fashiontrunk.fashiontrunkapi.Services.ClasificationService;
+import com.fashiontrunk.fashiontrunkapi.Models.UserEntity;
+import com.fashiontrunk.fashiontrunkapi.Services.ClassificationService;
 import com.fashiontrunk.fashiontrunkapi.Services.ModelService;
+import com.fashiontrunk.fashiontrunkapi.Services.UserService;
 import com.fashiontrunk.fashiontrunkapi.Util.ImageValidation;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
@@ -18,18 +21,23 @@ import java.util.*;
 public class ClassificationController {
 
     private final ModelService modelService;
-    ClasificationService classificationService = new ClasificationService();
+    private final ClassificationService classificationService;
+    private final UserService userService;
 
-    public ClassificationController(ModelService modelService) {
+    public ClassificationController(ModelService modelService, ClassificationService classificationService, UserService userService) {
         this.modelService = modelService;
+        this.classificationService = classificationService;
+        this.userService = userService;
     }
 
     @PostMapping
     public ResponseEntity<?> classifyDefault(
             @RequestParam("files") MultipartFile[] files,
             @RequestParam(name = "prediction_count", defaultValue = "5") int predictionCount,
-            @RequestParam(name = "confidence_threshold", defaultValue = "0.1") double confidenceThreshold
+            @RequestParam(name = "confidence_threshold", defaultValue = "0.1") double confidenceThreshold,
+            Authentication authentication
     ) {
+        UserEntity user = (UserEntity) authentication.getPrincipal();
         List<Object> results = new ArrayList<>();
 
         if (!ImageValidation.isValidImageBundle(files)) {
@@ -44,6 +52,7 @@ public class ClassificationController {
 
                 wrapped.put("filename", file.getOriginalFilename());
                 wrapped.put("results", mapper.readValue(result, Map.class).get("results"));
+                wrapped.put("user", user);
                 results.add(wrapped);
             } catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -60,8 +69,11 @@ public class ClassificationController {
             @RequestParam("files") MultipartFile[] images,
             @RequestParam("model_name") String modelName,
             @RequestParam("prediction_count") int predictionCount,
-            @RequestParam("confidence_threshold") double confidenceThreshold
+            @RequestParam("confidence_threshold") double confidenceThreshold,
+            Authentication authentication
     ) {
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+
         List<Object> results = new ArrayList<>();
 
         if (!ImageValidation.isValidImageBundle(images)) {
