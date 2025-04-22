@@ -1,9 +1,12 @@
 package com.fashiontrunk.fashiontrunkapi.Dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class ImageMetadataDTO {
     private String filename;
     private Integer width;
     private Integer height;
+    @JsonProperty("color_mode")
     private String colorMode;
     private String format;
 
@@ -47,5 +50,4 @@ public class ImageMetadataDTO {
         this.format = format;
     }
 
-    // Getters & Setters
 }

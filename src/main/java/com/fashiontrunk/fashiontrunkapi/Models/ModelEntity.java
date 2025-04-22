@@ -40,7 +40,7 @@ public class ModelEntity {
     private String status;
 
     @Column
-    private boolean isPublic;
+    private Boolean isPublic;
 
     public UUID getId() {
         return id;
@@ -120,5 +120,13 @@ public class ModelEntity {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Boolean getPublic() {
+        return isPublic;
+    }
+
+    public void setPublic(Boolean aPublic) {
+        isPublic = aPublic;
     }
 }

@@ -1,5 +1,6 @@
 package com.fashiontrunk.fashiontrunkapi.Services;
 
+import com.fashiontrunk.fashiontrunkapi.Dto.CatalogDTO;
 import com.fashiontrunk.fashiontrunkapi.Models.CatalogEntity;
 import com.fashiontrunk.fashiontrunkapi.Models.UserEntity;
 import com.fashiontrunk.fashiontrunkapi.Repositories.CatalogRepository;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class CatalogService {
@@ -20,17 +22,23 @@ public class CatalogService {
         this.catalogRepository = catalogRepository;
     }
 
-    public List<CatalogEntity> getRootCatalogsForUser(UserEntity user) {
-        return catalogRepository.findByParentIsNullAndOwner(user);
+    public List<CatalogDTO> getRootCatalogsForUser(UserEntity user) {
+        List<CatalogEntity> entities = catalogRepository.findByParentIsNullAndOwner(user);
+        return entities.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
-    public List<CatalogEntity> getChildren(UUID parentId) {
-        return catalogRepository.findByParentId(parentId);
+    public List<CatalogDTO> getChildren(UUID parentId, UserEntity user) {
+        List<CatalogEntity> children = catalogRepository.findByParentId(parentId).stream()
+                .filter(c -> c.getOwner().getId().equals(user.getId()))
+                .toList();
+
+        return children.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
     @Transactional
-    public CatalogEntity createCatalog(String name, UserEntity owner, UUID parentId, boolean isPublic) {
+    public CatalogDTO createCatalog(String name, UserEntity owner, UUID parentId, boolean isPublic) {
         CatalogEntity parent = null;
+
         if (parentId != null) {
             parent = catalogRepository.findById(parentId)
                     .orElseThrow(() -> new RuntimeException("Parent catalog not found"));
@@ -46,7 +54,8 @@ public class CatalogService {
         catalog.setOwner(owner);
         catalog.setParent(parent);
         catalog.setPublic(isPublic);
-        return catalogRepository.save(catalog);
+
+        return convertToDto(catalogRepository.save(catalog));
     }
 
     public List<CatalogEntity> getBreadcrumb(UUID catalogId) {
@@ -64,14 +73,15 @@ public class CatalogService {
     }
 
     @Transactional
-    public void deleteCatalog(UUID catalogId) {
+    public void deleteCatalog(UUID catalogId, UserEntity user) throws IllegalAccessException {
         CatalogEntity catalog = catalogRepository.findById(catalogId)
                 .orElseThrow(() -> new RuntimeException("Catalog not found"));
 
-        // Pašaliname rekursyviai visus vidinius katalogus
-        deleteChildrenRecursive(catalog);
+        if (!catalog.getOwner().getId().equals(user.getId())) {
+            throw new IllegalAccessException("User does not own this catalog.");
+        }
 
-        // Galiausiai pašalinam šį katalogą
+        deleteChildrenRecursive(catalog);
         catalogRepository.delete(catalog);
     }
 
@@ -81,5 +91,12 @@ public class CatalogService {
             deleteChildrenRecursive(child);
         }
         catalogRepository.deleteAll(children);
+    }
+    private CatalogDTO convertToDto(CatalogEntity entity) {
+        return new CatalogDTO(
+                entity.getId(),
+                entity.getName(),
+                entity.getParent() != null ? entity.getParent().getId() : null
+        );
     }
 }

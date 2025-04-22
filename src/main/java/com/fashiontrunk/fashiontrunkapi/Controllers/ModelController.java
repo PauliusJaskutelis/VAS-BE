@@ -5,22 +5,21 @@ import com.fashiontrunk.fashiontrunkapi.Services.MetadataService;
 import com.fashiontrunk.fashiontrunkapi.Services.ModelService;
 import com.fashiontrunk.fashiontrunkapi.Util.ModelStatusMessage;
 import com.fashiontrunk.fashiontrunkapi.Util.ModelStorage;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/models")
+@RequestMapping("/api/models")
 public class ModelController {
     private final ModelService modelService;
     private final MetadataService metadataService;
@@ -36,7 +35,8 @@ public class ModelController {
     public ResponseEntity<ModelEntity> registerModel(
             @RequestPart("file") MultipartFile file,
             @RequestPart("modelId") String id,
-            @RequestPart("name") String filename
+            @RequestPart("name") String filename,
+            Authentication authentication
     ) throws IOException, InterruptedException {
 
         UUID modelId = UUID.fromString(id);
@@ -71,14 +71,14 @@ public class ModelController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getModelById(@PathVariable UUID id) {
+    public ResponseEntity<?> getModelById(@PathVariable UUID id, Authentication authentication) {
         return modelService.getModelById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping
-    public ResponseEntity<List<ModelEntity>> getAllModels() {
+    public ResponseEntity<List<ModelEntity>> getAllModels(Authentication authentication) {
         return ResponseEntity.ok(modelService.getAllModels());
     }
     public void updateStatus(UUID modelId, String status) {

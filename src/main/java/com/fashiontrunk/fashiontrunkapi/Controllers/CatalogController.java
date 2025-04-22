@@ -1,5 +1,6 @@
 package com.fashiontrunk.fashiontrunkapi.Controllers;
 
+import com.fashiontrunk.fashiontrunkapi.Dto.CatalogDTO;
 import com.fashiontrunk.fashiontrunkapi.Models.CatalogEntity;
 import com.fashiontrunk.fashiontrunkapi.Models.UserEntity;
 import com.fashiontrunk.fashiontrunkapi.Repositories.UserRepository;
@@ -10,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -17,22 +19,25 @@ import java.util.UUID;
 public class CatalogController {
 
     private final CatalogService catalogService;
-
-    public CatalogController(CatalogService catalogService) {
+    private final UserService userService;
+    public CatalogController(CatalogService catalogService, UserService userService) {
         this.catalogService = catalogService;
+        this.userService = userService;
     }
 
     @GetMapping("/root")
-    public ResponseEntity<List<CatalogEntity>> getRootCatalogs(@RequestParam("userId") UUID userId) {
-        // In production, user info should come from SecurityContext
-        UserEntity user = new UserEntity(); user.setId(userId);
-        List<CatalogEntity> catalogs = catalogService.getRootCatalogsForUser(user);
-        return ResponseEntity.ok(catalogs);
+    public ResponseEntity<List<CatalogDTO>> getRootCatalogs(Authentication authentication) {
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+
+        List<CatalogDTO> rootCatalogs = catalogService.getRootCatalogsForUser(user);
+        return ResponseEntity.ok(rootCatalogs);
     }
 
     @GetMapping("/{parentId}/children")
-    public ResponseEntity<List<CatalogEntity>> getChildren(@PathVariable UUID parentId) {
-        List<CatalogEntity> children = catalogService.getChildren(parentId);
+    public ResponseEntity<List<CatalogDTO>> getChildren(@PathVariable UUID parentId, Authentication authentication) {
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+
+        List<CatalogDTO> children = catalogService.getChildren(parentId, user);
         return ResponseEntity.ok(children);
     }
 
@@ -45,7 +50,7 @@ public class CatalogController {
     ) {
         try {
             UserEntity user = (UserEntity) authentication.getPrincipal();
-            CatalogEntity created = catalogService.createCatalog(name, user, parentId, isPublic);
+            CatalogDTO created = catalogService.createCatalog(name, user, parentId, isPublic);
             return ResponseEntity.ok(created);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -53,12 +58,15 @@ public class CatalogController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteCatalog(@PathVariable UUID id) {
+    public ResponseEntity<?> deleteCatalog(@PathVariable UUID id, Authentication authentication) {
         try {
-            catalogService.deleteCatalog(id);
-            return ResponseEntity.ok("Catalog deleted");
+            UserEntity user = (UserEntity) authentication.getPrincipal();
+            catalogService.deleteCatalog(id, user); // validate user owns the catalog
+            return ResponseEntity.ok().build();
+        } catch (IllegalAccessException e) {
+            return ResponseEntity.status(403).body("Access denied");
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body("Catalog not found");
+            return ResponseEntity.notFound().build();
         }
     }
 }

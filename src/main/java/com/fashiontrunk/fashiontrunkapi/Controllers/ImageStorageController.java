@@ -4,9 +4,11 @@ import com.fashiontrunk.fashiontrunkapi.Dto.ImageDTO;
 import com.fashiontrunk.fashiontrunkapi.Models.ImageEntity;
 import com.fashiontrunk.fashiontrunkapi.Models.UserEntity;
 import com.fashiontrunk.fashiontrunkapi.Services.ImageService;
+import com.fashiontrunk.fashiontrunkapi.Services.UserService;
 import com.fashiontrunk.fashiontrunkapi.Util.ImageMapper;
 import com.fashiontrunk.fashiontrunkapi.Util.ImageValidation;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -48,14 +50,23 @@ public class ImageStorageController {
     }
 
     @GetMapping("/catalog/{catalogId}")
-    public ResponseEntity<List<ImageEntity>> getImagesFromCatalog(@PathVariable UUID catalogId) {
+    public ResponseEntity<List<ImageDTO>> getImagesFromCatalog(@PathVariable UUID catalogId, Authentication authentication) {
+
         List<ImageEntity> images = imageService.getImagesFromCatalog(catalogId);
-        return ResponseEntity.ok(images);
+        List<ImageDTO> dtos = images.stream()
+                .map(ImageMapper::toDTO)
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/{imageId}")
-    public ResponseEntity<byte[]> downloadImage(@PathVariable UUID imageId) {
+    public ResponseEntity<byte[]> downloadImage(@PathVariable UUID imageId, Authentication authentication) {
+        UserEntity user = (UserEntity) authentication.getPrincipal();
         ImageEntity image = imageService.getImageById(imageId);
+
+        if (!image.getOwner().getId().equals(user.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + image.getFilename() + "\"")
@@ -64,7 +75,7 @@ public class ImageStorageController {
     }
 
     @DeleteMapping("/{imageId}")
-    public ResponseEntity<String> deleteImage(@PathVariable UUID imageId) {
+    public ResponseEntity<String> deleteImage(@PathVariable UUID imageId, Authentication authentication) {
         try {
             imageService.deleteImage(imageId);
             return ResponseEntity.ok("Image deleted");

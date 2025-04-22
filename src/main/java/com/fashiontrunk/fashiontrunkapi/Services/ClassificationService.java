@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
-public class ClasificationService extends ContainerServiceBase {
+public class ClassificationService extends ContainerServiceBase {
 
     private static final String CONTAINER_NAME = "custom-model-tf";
     private static final String IMAGE_NAME = "custom-model-tf";

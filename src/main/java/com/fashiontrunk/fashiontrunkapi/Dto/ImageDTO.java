@@ -9,8 +9,8 @@ public class ImageDTO {
     private String contentType;
     private String format;
     private String colorMode;
-    private int width;
-    private int height;
+    private Integer width;
+    private Integer height;
     private Date uploadDate;
     private UUID catalogId;
     private UUID ownerId;
@@ -55,19 +55,19 @@ public class ImageDTO {
         this.colorMode = colorMode;
     }
 
-    public int getWidth() {
+    public Integer getWidth() {
         return width;
     }
 
-    public void setWidth(int width) {
+    public void setWidth(Integer width) {
         this.width = width;
     }
 
-    public int getHeight() {
+    public Integer getHeight() {
         return height;
     }
 
-    public void setHeight(int height) {
+    public void setHeight(Integer height) {
         this.height = height;
     }
 
