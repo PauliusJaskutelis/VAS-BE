@@ -1,9 +1,7 @@
 package com.fashiontrunk.fashiontrunkapi.Controllers;
 
 import com.fashiontrunk.fashiontrunkapi.Dto.CatalogDTO;
-import com.fashiontrunk.fashiontrunkapi.Models.CatalogEntity;
 import com.fashiontrunk.fashiontrunkapi.Models.UserEntity;
-import com.fashiontrunk.fashiontrunkapi.Repositories.UserRepository;
 import com.fashiontrunk.fashiontrunkapi.Services.CatalogService;
 import com.fashiontrunk.fashiontrunkapi.Services.UserService;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +9,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -19,10 +16,8 @@ import java.util.UUID;
 public class CatalogController {
 
     private final CatalogService catalogService;
-    private final UserService userService;
-    public CatalogController(CatalogService catalogService, UserService userService) {
+    public CatalogController(CatalogService catalogService) {
         this.catalogService = catalogService;
-        this.userService = userService;
     }
 
     @GetMapping("/root")

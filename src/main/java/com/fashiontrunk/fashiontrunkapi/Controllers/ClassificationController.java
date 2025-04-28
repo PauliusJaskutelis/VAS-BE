@@ -4,10 +4,8 @@ import com.fashiontrunk.fashiontrunkapi.Models.ModelEntity;
 import com.fashiontrunk.fashiontrunkapi.Models.UserEntity;
 import com.fashiontrunk.fashiontrunkapi.Services.ClassificationService;
 import com.fashiontrunk.fashiontrunkapi.Services.ModelService;
-import com.fashiontrunk.fashiontrunkapi.Services.UserService;
 import com.fashiontrunk.fashiontrunkapi.Util.ImageValidation;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -22,12 +20,10 @@ public class ClassificationController {
 
     private final ModelService modelService;
     private final ClassificationService classificationService;
-    private final UserService userService;
 
-    public ClassificationController(ModelService modelService, ClassificationService classificationService, UserService userService) {
+    public ClassificationController(ModelService modelService, ClassificationService classificationService) {
         this.modelService = modelService;
         this.classificationService = classificationService;
-        this.userService = userService;
     }
 
     @PostMapping
@@ -73,24 +69,34 @@ public class ClassificationController {
             Authentication authentication
     ) {
         UserEntity user = (UserEntity) authentication.getPrincipal();
-
         List<Object> results = new ArrayList<>();
+        Optional<ModelEntity> model = modelService.getModelById(id);
+        ModelEntity modelMetadata;
 
         if (!ImageValidation.isValidImageBundle(images)) {
             return new ResponseEntity<>("File Not Accepted", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
         }
 
-        Optional<ModelEntity> model = modelService.getModelById(id);
         if (model.isEmpty()) {
             return new ResponseEntity<>("Model not Found", HttpStatus.NOT_FOUND);
         }
 
+        modelMetadata = model.get();
         for (MultipartFile image : images) {
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 Map<String, Object> wrapped = new HashMap<>();
                 String result = classificationService.classifyWithModel(
-                        id, model.get().getStoragePath(), image, predictionCount, confidenceThreshold);
+                        id,
+                        modelMetadata.getStoragePath(),
+                        image,
+                        predictionCount,
+                        confidenceThreshold,
+                        modelMetadata.getInputHeight(),
+                        modelMetadata.getInputWidth(),
+                        false,
+                        modelMetadata.getColorMode()
+                );
 
                 wrapped.put("filename", image.getOriginalFilename());
                 wrapped.put("results", mapper.readValue(result, Map.class).get("results"));
