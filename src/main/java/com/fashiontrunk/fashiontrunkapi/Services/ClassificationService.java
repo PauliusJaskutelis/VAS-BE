@@ -79,7 +79,12 @@ public class ClassificationService extends ContainerServiceBase {
             String storagePath,
             MultipartFile image,
             int predictionCount,
-            double confidenceThreshold
+            double confidenceThreshold,
+            int resizeHeight,
+            int resizeWidth,
+            boolean normalize,
+            String colorMode
+
     ) throws IOException, InterruptedException {
 
         File modelFile;
@@ -125,7 +130,12 @@ public class ClassificationService extends ContainerServiceBase {
         String classifyUrl = UriComponentsBuilder.fromHttpUrl("http://localhost:" + PORT + "/classify")
                 .queryParam("prediction_count", predictionCount)
                 .queryParam("confidence_threshold", confidenceThreshold)
+                .queryParam("resize_height", resizeHeight)
+                .queryParam("resize_width", resizeWidth)
+                .queryParam("normalize", normalize)
+                .queryParam("color_mode", colorMode)
                 .toUriString();
+
         System.out.println("Paoint tree");
         ResponseEntity<String> response = restTemplate.postForEntity(classifyUrl, new HttpEntity<>(imageRequest, headers), String.class);
         System.out.println("Point four");
