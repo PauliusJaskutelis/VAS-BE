@@ -3,7 +3,6 @@ package com.fashiontrunk.fashiontrunkapi.Services;
 import com.fashiontrunk.fashiontrunkapi.Dto.ImageMetadataDTO;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
-import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;

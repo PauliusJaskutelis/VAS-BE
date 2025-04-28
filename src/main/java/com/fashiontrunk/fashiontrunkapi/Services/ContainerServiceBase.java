@@ -1,7 +1,6 @@
 package com.fashiontrunk.fashiontrunkapi.Services;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
