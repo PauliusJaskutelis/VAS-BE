@@ -1,6 +1,7 @@
 package com.fashiontrunk.fashiontrunkapi.Services;
 
 import com.fashiontrunk.fashiontrunkapi.Util.ModelStorage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
@@ -26,6 +27,9 @@ public class ClassificationService extends ContainerServiceBase {
     private static final String CONTAINER_NAME = "custom-model-tf";
     private static final String IMAGE_NAME = "custom-model-tf";
     private static final int PORT = 5000;
+
+    @Autowired
+    private ModelStorage modelStorage;
 
     @Override
     protected String getContainerName(){ return CONTAINER_NAME; }
@@ -108,7 +112,7 @@ public class ClassificationService extends ContainerServiceBase {
         // 📤 Only upload the model if needed
         if (!hasModel) {
 
-            modelFile = ModelStorage.getModelFile(modelId, storagePath);
+            modelFile = modelStorage.getModelFile(modelId, storagePath);
             if(!modelFile.exists()){
                 System.out.println("Model was not found" + modelFile.getAbsolutePath());
                 throw new IOException("Model was not found" + modelFile.getAbsolutePath());

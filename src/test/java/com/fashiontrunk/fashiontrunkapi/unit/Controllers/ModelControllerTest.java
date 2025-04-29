@@ -5,6 +5,8 @@ import com.fashiontrunk.fashiontrunkapi.Models.ModelEntity;
 import com.fashiontrunk.fashiontrunkapi.Models.UserEntity;
 import com.fashiontrunk.fashiontrunkapi.Services.MetadataService;
 import com.fashiontrunk.fashiontrunkapi.Services.ModelService;
+import com.fashiontrunk.fashiontrunkapi.Util.ModelStorage;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +43,9 @@ public class ModelControllerTest {
     @MockBean
     private SimpMessagingTemplate messagingTemplate;
 
+    @MockBean
+    private ModelStorage modelStorage;
+    
     private UserEntity user;
 
     @BeforeEach

@@ -25,6 +25,9 @@ public class ModelController {
     private final MetadataService metadataService;
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private ModelStorage modelStorage;
     @Autowired
     public ModelController(ModelService modelService, MetadataService metadataService) {
         this.modelService = modelService;
@@ -48,7 +51,7 @@ public class ModelController {
             ModelEntity model = new ModelEntity();
             model.setId(modelId);
             model.setFilename(filename);
-            model.setStoragePath(ModelStorage.storeModelFile(file, modelId));
+            model.setStoragePath(modelStorage.storeModelFile(file, modelId));
             model.setInputHeight((int) modelMetadata.get("input_height"));
             model.setInputWidth((int) modelMetadata.get("input_width"));
             model.setColorMode((String) modelMetadata.get("color_mode"));
