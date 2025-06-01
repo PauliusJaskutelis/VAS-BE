@@ -4,6 +4,7 @@ import com.fashiontrunk.fashiontrunkapi.Controllers.ClassificationController;
 import com.fashiontrunk.fashiontrunkapi.Models.ModelEntity;
 import com.fashiontrunk.fashiontrunkapi.Models.UserEntity;
 import com.fashiontrunk.fashiontrunkapi.Services.ClassificationService;
+import com.fashiontrunk.fashiontrunkapi.Services.LLMService;
 import com.fashiontrunk.fashiontrunkapi.Services.ModelService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,9 @@ class ClassificationControllerTest {
 
     @Mock
     private Authentication authentication;
+
+    @Mock
+    private LLMService llmService;
 
     @InjectMocks
     private ClassificationController classificationController;
