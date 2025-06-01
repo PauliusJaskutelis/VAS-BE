@@ -4,6 +4,7 @@ import com.fashiontrunk.fashiontrunkapi.Controllers.ClassificationController;
 import com.fashiontrunk.fashiontrunkapi.Models.ModelEntity;
 import com.fashiontrunk.fashiontrunkapi.Models.UserEntity;
 import com.fashiontrunk.fashiontrunkapi.Services.ClassificationService;
+import com.fashiontrunk.fashiontrunkapi.Services.LLMService;
 import com.fashiontrunk.fashiontrunkapi.Services.ModelService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,9 @@ class ClassificationControllerTest {
 
     @Mock
     private Authentication authentication;
+
+    @Mock
+    private LLMService llmService;
 
     @InjectMocks
     private ClassificationController classificationController;
@@ -68,6 +72,8 @@ class ClassificationControllerTest {
     void classifyDefault_success() throws Exception {
         when(classificationService.sendToClassifier(any(), anyInt(), anyDouble()))
                 .thenReturn("{\"results\": [\"cat\"]}");
+        when(llmService.generateDescription(anyList(), any(ModelEntity.class)))
+                .thenReturn("This is a mock description.");
 
         ResponseEntity<?> response = classificationController.classifyDefault(new MockMultipartFile[]{validFile}, 5, 0.1, authentication);
 
@@ -92,9 +98,9 @@ class ClassificationControllerTest {
 
         when(modelService.getModelById(any())).thenReturn(Optional.of(modelEntity));
         when(classificationService.classifyWithModel(any(), anyString(), any(), anyInt(), anyDouble(), anyInt(), anyInt(), anyBoolean(), anyString()))
-                .thenReturn("{\"results\": [\"dog\"]}");
+                .thenReturn("{\"results\": [{\"label\": \"dog\", \"confidence\": 0.95}]}");
 
-        ResponseEntity<?> response = classificationController.classifyWithModel(UUID.randomUUID(), new MockMultipartFile[]{validFile}, "Test Model", 5, 0.1, authentication);
+        ResponseEntity<?> response = classificationController.classifyWithModel(UUID.randomUUID(), new MockMultipartFile[]{validFile}, "Test Model", 5, 0.1, false, authentication);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().toString().contains("dog"));
@@ -104,14 +110,14 @@ class ClassificationControllerTest {
     void classifyWithModel_modelNotFound() {
         when(modelService.getModelById(any())).thenReturn(Optional.empty());
 
-        ResponseEntity<?> response = classificationController.classifyWithModel(UUID.randomUUID(), new MockMultipartFile[]{validFile}, "Test Model", 5, 0.1, authentication);
+        ResponseEntity<?> response = classificationController.classifyWithModel(UUID.randomUUID(), new MockMultipartFile[]{validFile}, "Test Model", 5, 0.1, false,  authentication);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
     @Test
     void classifyWithModel_invalidImageBundle() {
-        ResponseEntity<?> response = classificationController.classifyWithModel(UUID.randomUUID(), new MockMultipartFile[]{emptyFile}, "Test Model", 5, 0.1, authentication);
+        ResponseEntity<?> response = classificationController.classifyWithModel(UUID.randomUUID(), new MockMultipartFile[]{emptyFile}, "Test Model", 5, 0.1, false, authentication);
 
         assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, response.getStatusCode());
     }

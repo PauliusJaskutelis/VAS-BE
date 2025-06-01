@@ -43,7 +43,7 @@ public class MetadataService extends ContainerServiceBase {
      }
 
     public ImageMetadataDTO extractImageMetadata(MultipartFile image) throws IOException, InterruptedException {
-        startContainer(); // Užtikrina, kad servisas paleistas
+        startContainer();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
