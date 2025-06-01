@@ -3,6 +3,7 @@ package com.fashiontrunk.fashiontrunkapi.Controllers;
 import com.fashiontrunk.fashiontrunkapi.Models.ModelEntity;
 import com.fashiontrunk.fashiontrunkapi.Models.UserEntity;
 import com.fashiontrunk.fashiontrunkapi.Services.ClassificationService;
+import com.fashiontrunk.fashiontrunkapi.Services.LLMService;
 import com.fashiontrunk.fashiontrunkapi.Services.ModelService;
 import com.fashiontrunk.fashiontrunkapi.Util.ImageValidation;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,10 +21,12 @@ public class ClassificationController {
 
     private final ModelService modelService;
     private final ClassificationService classificationService;
+    private final LLMService llmService;
 
-    public ClassificationController(ModelService modelService, ClassificationService classificationService) {
+    public ClassificationController(ModelService modelService, ClassificationService classificationService, LLMService llmService) {
         this.modelService = modelService;
         this.classificationService = classificationService;
+        this.llmService = llmService;
     }
 
     @PostMapping
@@ -66,6 +69,7 @@ public class ClassificationController {
             @RequestParam("model_name") String modelName,
             @RequestParam("prediction_count") int predictionCount,
             @RequestParam("confidence_threshold") double confidenceThreshold,
+            @RequestParam("describe") boolean isDescribing,
             Authentication authentication
     ) {
         UserEntity user = (UserEntity) authentication.getPrincipal();
@@ -98,12 +102,22 @@ public class ClassificationController {
                         modelMetadata.getColorMode()
                 );
 
+                Map<String, Object> parsed = mapper.readValue(result, Map.class);
+                List<Map<String, Object>> rawResults = (List<Map<String, Object>>) parsed.get("results");
+
+                List<String> labels = rawResults.stream()
+                        .map(entry -> (String) entry.get("label"))
+                        .toList();
+
+                String description = isDescribing ? llmService.generateDescription(labels, modelMetadata) : null;
+
                 wrapped.put("filename", image.getOriginalFilename());
-                wrapped.put("results", mapper.readValue(result, Map.class).get("results"));
+                wrapped.put("results", rawResults);
+                wrapped.put("description", description);
                 results.add(wrapped);
             } catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("Error processing file: " + image.getOriginalFilename());
+                        .body("Error processing file: " + image.getOriginalFilename() + e);
             }
         }
 

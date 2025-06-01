@@ -129,4 +129,10 @@ public class ModelEntity {
     public void setPublic(Boolean aPublic) {
         isPublic = aPublic;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Model '%s' with input size %dx%d and color mode %s",
+                filename, inputWidth, inputHeight, colorMode);
+    }
 }

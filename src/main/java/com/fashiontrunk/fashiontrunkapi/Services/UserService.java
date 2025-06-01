@@ -47,4 +47,7 @@ public class UserService {
         user.setLastLogin(new Date());
         return userRepository.save(user); // Optionally update last login
     }
+    public UserEntity save(UserEntity user) {
+        return userRepository.save(user);
+    }
 }

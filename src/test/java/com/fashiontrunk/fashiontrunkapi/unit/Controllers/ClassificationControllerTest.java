@@ -94,7 +94,7 @@ class ClassificationControllerTest {
         when(classificationService.classifyWithModel(any(), anyString(), any(), anyInt(), anyDouble(), anyInt(), anyInt(), anyBoolean(), anyString()))
                 .thenReturn("{\"results\": [\"dog\"]}");
 
-        ResponseEntity<?> response = classificationController.classifyWithModel(UUID.randomUUID(), new MockMultipartFile[]{validFile}, "Test Model", 5, 0.1, authentication);
+        ResponseEntity<?> response = classificationController.classifyWithModel(UUID.randomUUID(), new MockMultipartFile[]{validFile}, "Test Model", 5, 0.1, false, authentication);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().toString().contains("dog"));
@@ -104,14 +104,14 @@ class ClassificationControllerTest {
     void classifyWithModel_modelNotFound() {
         when(modelService.getModelById(any())).thenReturn(Optional.empty());
 
-        ResponseEntity<?> response = classificationController.classifyWithModel(UUID.randomUUID(), new MockMultipartFile[]{validFile}, "Test Model", 5, 0.1, authentication);
+        ResponseEntity<?> response = classificationController.classifyWithModel(UUID.randomUUID(), new MockMultipartFile[]{validFile}, "Test Model", 5, 0.1, false,  authentication);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
     @Test
     void classifyWithModel_invalidImageBundle() {
-        ResponseEntity<?> response = classificationController.classifyWithModel(UUID.randomUUID(), new MockMultipartFile[]{emptyFile}, "Test Model", 5, 0.1, authentication);
+        ResponseEntity<?> response = classificationController.classifyWithModel(UUID.randomUUID(), new MockMultipartFile[]{emptyFile}, "Test Model", 5, 0.1, false, authentication);
 
         assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, response.getStatusCode());
     }
