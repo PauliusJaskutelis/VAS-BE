@@ -72,6 +72,8 @@ class ClassificationControllerTest {
     void classifyDefault_success() throws Exception {
         when(classificationService.sendToClassifier(any(), anyInt(), anyDouble()))
                 .thenReturn("{\"results\": [\"cat\"]}");
+        when(llmService.generateDescription(anyList(), any(ModelEntity.class)))
+                .thenReturn("This is a mock description.");
 
         ResponseEntity<?> response = classificationController.classifyDefault(new MockMultipartFile[]{validFile}, 5, 0.1, authentication);
 
