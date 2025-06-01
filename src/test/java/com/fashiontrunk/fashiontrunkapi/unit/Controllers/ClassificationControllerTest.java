@@ -98,7 +98,7 @@ class ClassificationControllerTest {
 
         when(modelService.getModelById(any())).thenReturn(Optional.of(modelEntity));
         when(classificationService.classifyWithModel(any(), anyString(), any(), anyInt(), anyDouble(), anyInt(), anyInt(), anyBoolean(), anyString()))
-                .thenReturn("{\"results\": [\"dog\"]}");
+                .thenReturn("{\"results\": [{\"label\": \"dog\", \"confidence\": 0.95}]}");
 
         ResponseEntity<?> response = classificationController.classifyWithModel(UUID.randomUUID(), new MockMultipartFile[]{validFile}, "Test Model", 5, 0.1, false, authentication);
 
